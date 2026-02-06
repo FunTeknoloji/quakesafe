@@ -37,8 +37,10 @@ jobs:
 
       - name: Update Android minSdkVersion
         run: |
-          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/g' android/app/build.gradle
-          sed -i 's/minSdkVersion [0-9]\+/minSdkVersion 23/g' android/app/build.gradle
+          # Force minSdkVersion to 23 for torch_light compatibility
+          sed -i 's/minSdkVersion.*/minSdkVersion 23/g' android/app/build.gradle
+          # Print file to verify change in logs
+          cat android/app/build.gradle | grep minSdkVersion
 
       - name: Build APK
         run: flutter build apk --release
