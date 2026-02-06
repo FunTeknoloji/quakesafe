@@ -35,6 +35,11 @@ jobs:
       - name: Create Android Project
         run: flutter create . --platforms=android
 
+      - name: Update Android minSdkVersion
+        run: |
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/g' android/app/build.gradle
+          sed -i 's/minSdkVersion [0-9]\+/minSdkVersion 23/g' android/app/build.gradle
+
       - name: Build APK
         run: flutter build apk --release
 
