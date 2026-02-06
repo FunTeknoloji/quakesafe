@@ -1,0 +1,10 @@
+{
+  "appId": "com.funteknoloji.quakesafe",
+  "appName": "QuakeSafe",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
