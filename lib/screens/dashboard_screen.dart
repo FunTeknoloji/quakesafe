@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../widgets/sos_button.dart';
 import '../widgets/status_bar.dart';
+import 'tools_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -28,7 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 index: _selectedIndex,
                 children: [
                    _buildHomeView(),
-                   _buildToolsView(),
+                   const ToolsScreen(),
                    const Center(child: Text("Bilgi Sayfası Hazırlanıyor...")),
                    const Center(child: Text("Profil Sayfası Hazırlanıyor...")),
                 ],
@@ -109,41 +110,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SizedBox(height: 8),
         Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
-    );
-  }
-  
-  Widget _buildToolsView() {
-    return GridView.count(
-      crossAxisCount: 2,
-      padding: const EdgeInsets.all(20),
-      mainAxisSpacing: 15,
-      crossAxisSpacing: 15,
-      children: [
-        _toolCard("Çakar Fener", "Kör Edici Işık", LucideIcons.zap, Colors.yellow),
-        _toolCard("Polis Modu", "Kırmızı/Mavi", LucideIcons.siren, Colors.blue),
-        _toolCard("Köpek Düdüğü", "Ultrasonik", LucideIcons.mic, Colors.orange),
-        _toolCard("Sinyal Aynası", "Haberleşme", LucideIcons.scanFace, Colors.green),
-      ],
-    );
-  }
-  
-  Widget _toolCard(String title, String subtitle, IconData icon, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 40, color: color),
-          const SizedBox(height: 15),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 5),
-          Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        ],
-      ),
     );
   }
 }
