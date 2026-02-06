@@ -35,13 +35,25 @@ jobs:
       - name: Create Android Project
         run: flutter create . --platforms=android
 
-      - name: Update Android minSdkVersion
+      - name: Configure Android Build (SDK & Kotlin)
         run: |
           python3 -c "
           import re
-          path = 'android/app/build.gradle'
-          with open(path, 'r') as f: lines = f.readlines()
-          with open(path, 'w') as f:
+          path = 'android/build.gradle'
+          try:
+              with open(path, 'r') as f: lines = f.readlines()
+              with open(path, 'w') as f:
+                  for line in lines:
+                      if 'ext.kotlin_version' in line:
+                          f.write(\"    ext.kotlin_version = '1.9.0'\n\")
+                      else:
+                          f.write(line)
+          except FileNotFoundError:
+              print('android/build.gradle not found, skipping kotlin update')
+
+          path_app = 'android/app/build.gradle'
+          with open(path_app, 'r') as f: lines = f.readlines()
+          with open(path_app, 'w') as f:
               for line in lines:
                   if 'minSdkVersion' in line and '//' not in line and 'flutter' in line:
                       f.write('        minSdkVersion 23\n')
@@ -50,8 +62,11 @@ jobs:
                   else:
                       f.write(line)
           "
-          # Verify the change
-          cat android/app/build.gradle | grep minSdkVersion
+          # Verify changes
+          echo "Checking Kotlin Version:"
+          grep "kotlin_version" android/build.gradle || true
+          echo "Checking minSdkVersion:"
+          grep "minSdkVersion" android/app/build.gradle
 
       - name: Build APK
         run: flutter build apk --release
