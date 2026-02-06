@@ -35,45 +35,53 @@ jobs:
       - name: Create Android Project
         run: flutter create . --platforms=android
 
-      - name: Configure Android Build (SDK & Kotlin)
+      - name: Force Android SDK Version (Nuclear Option)
         run: |
+          # 1. Create local.properties with forced versions
+          echo "flutter.minSdkVersion=23" > android/local.properties
+          echo "flutter.targetSdkVersion=34" >> android/local.properties
+          echo "flutter.compileSdkVersion=34" >> android/local.properties
+          
+          # 2. Python script to patch build.gradle as backup
           python3 -c "
           import re
+          import os
           
-          # 1. Update Kotlin Version in android/build.gradle
-          path_build = 'android/build.gradle'
-          try:
-              with open(path_build, 'r') as f: content = f.read()
-              # Regex replace to handle any existing version assignment
-              if 'ext.kotlin_version' in content:
-                  content = re.sub(r'ext\.kotlin_version = .*', \"ext.kotlin_version = '1.9.0'\", content)
+          def patch_file(path, pattern, replacement):
+              if not os.path.exists(path):
+                  print(f'Skipping {path} (not found)')
+                  return
+              
+              with open(path, 'r') as f: content = f.read()
+              
+              # Check if pattern exists
+              if not re.search(pattern, content):
+                  print(f'Warning: Pattern {pattern} not found in {path}')
+                  print('Content dump (first 500 chars):')
+                  print(content[:500])
               else:
-                  # If missing, try to inject (fallback) - simplistic match for buildscript {
-                  print('Warning: ext.kotlin_version not found, attempting injection')
-                  content = content.replace('buildscript {', \"buildscript {\\n    ext.kotlin_version = '1.9.0'\")
-              
-              with open(path_build, 'w') as f: f.write(content)
-              print(f'Updated {path_build}')
-          except FileNotFoundError:
-              print(f'{path_build} not found')
+                  new_content = re.sub(pattern, replacement, content)
+                  with open(path, 'w') as f: f.write(new_content)
+                  print(f'Success: Patched {path}')
+          
+          # Patch 1: Kotlin Version in root build.gradle
+          # Matches 'ext.kotlin_version = ...' or injects it
+          patch_file('android/build.gradle', 
+                    r'ext\.kotlin_version = .*', 
+                    \"ext.kotlin_version = '1.9.0'\")
 
-          # 2. Update minSdkVersion in android/app/build.gradle
-          path_app = 'android/app/build.gradle'
-          try:
-              with open(path_app, 'r') as f: content = f.read()
-              
-              # Replace minSdkVersion with 23, handling any previous value
-              content = re.sub(r'minSdkVersion .*', 'minSdkVersion 23', content)
-              
-              with open(path_app, 'w') as f: f.write(content)
-              print(f'Updated {path_app}')
-          except FileNotFoundError:
-              print(f'{path_app} not found')
+          # Patch 2: minSdkVersion in app/build.gradle
+          # Matches 'minSdkVersion ...' (handling spaces)
+          patch_file('android/app/build.gradle', 
+                    r'\s*minSdkVersion\s+.*', 
+                    '\n        minSdkVersion 23')
           "
-          # Verify changes
-          echo "=== VERIFICATION ==="
-          grep "kotlin_version" android/build.gradle || true
-          grep "minSdkVersion" android/app/build.gradle || true
+          
+          # 3. Verification
+          echo "=== DEBUG: android/app/build.gradle content (minSdk) ==="
+          grep "minSdkVersion" android/app/build.gradle || echo "minSdkVersion NOT FOUND"
+          echo "=== DEBUG: android/local.properties content ==="
+          cat android/local.properties
 
       - name: Build APK
         run: flutter build apk --release
