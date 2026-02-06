@@ -1,12 +1,38 @@
-node_modules/
-dist/
-www/
+# Miscellaneous
+*.class
 *.log
+*.pyc
+*.swp
 .DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+
+# Flutter/Dart/Pub
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/flutter_export_environment.sh
+/ios/Flutter/app.flx
+/ios/Flutter/app.zip
+/ios/Flutter/flutter_assets/
+/ios/Flutter/view_model_snapshot_data
+/ios/Flutter/view_model_snapshot_instr
+/ios/Flutter/snapshot_blob.bin.d
+/ios/ServiceDefinitions.json
+
 # Android
-android/app/build/
-android/.gradle/
-android/local.properties
-android/*.iml
-# Capacitor
-capacitor.config.json.timestamp
+android/
+ios/
+windows/
+linux/
+macos/
+web/
+# Note: Since we are generating just the source, we might ignore platform folders 
+# but usually we want to commit them. Since they don't exist yet, it's fine.
