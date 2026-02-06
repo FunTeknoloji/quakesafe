@@ -37,9 +37,20 @@ jobs:
 
       - name: Update Android minSdkVersion
         run: |
-          # Force minSdkVersion to 23 for torch_light compatibility
-          sed -i 's/minSdkVersion.*/minSdkVersion 23/g' android/app/build.gradle
-          # Print file to verify change in logs
+          python3 -c "
+          import re
+          path = 'android/app/build.gradle'
+          with open(path, 'r') as f: lines = f.readlines()
+          with open(path, 'w') as f:
+              for line in lines:
+                  if 'minSdkVersion' in line and '//' not in line and 'flutter' in line:
+                      f.write('        minSdkVersion 23\n')
+                  elif 'minSdkVersion' in line and '//' not in line:
+                       f.write('        minSdkVersion 23\n')
+                  else:
+                      f.write(line)
+          "
+          # Verify the change
           cat android/app/build.gradle | grep minSdkVersion
 
       - name: Build APK
