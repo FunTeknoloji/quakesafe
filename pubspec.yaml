@@ -14,7 +14,7 @@ dependencies:
   vibration: ^1.9.0
   torch_light: ^1.0.0
   geolocator: ^10.1.0
-  lucide_icons: ^0.300.0
+  lucide_icons: ^0.257.0
   url_launcher: ^6.2.0
 
 dev_dependencies:
