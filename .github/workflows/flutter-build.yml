@@ -39,34 +39,41 @@ jobs:
         run: |
           python3 -c "
           import re
-          path = 'android/build.gradle'
+          
+          # 1. Update Kotlin Version in android/build.gradle
+          path_build = 'android/build.gradle'
           try:
-              with open(path, 'r') as f: lines = f.readlines()
-              with open(path, 'w') as f:
-                  for line in lines:
-                      if 'ext.kotlin_version' in line:
-                          f.write(\"    ext.kotlin_version = '1.9.0'\n\")
-                      else:
-                          f.write(line)
+              with open(path_build, 'r') as f: content = f.read()
+              # Regex replace to handle any existing version assignment
+              if 'ext.kotlin_version' in content:
+                  content = re.sub(r'ext\.kotlin_version = .*', \"ext.kotlin_version = '1.9.0'\", content)
+              else:
+                  # If missing, try to inject (fallback) - simplistic match for buildscript {
+                  print('Warning: ext.kotlin_version not found, attempting injection')
+                  content = content.replace('buildscript {', \"buildscript {\\n    ext.kotlin_version = '1.9.0'\")
+              
+              with open(path_build, 'w') as f: f.write(content)
+              print(f'Updated {path_build}')
           except FileNotFoundError:
-              print('android/build.gradle not found, skipping kotlin update')
+              print(f'{path_build} not found')
 
+          # 2. Update minSdkVersion in android/app/build.gradle
           path_app = 'android/app/build.gradle'
-          with open(path_app, 'r') as f: lines = f.readlines()
-          with open(path_app, 'w') as f:
-              for line in lines:
-                  if 'minSdkVersion' in line and '//' not in line and 'flutter' in line:
-                      f.write('        minSdkVersion 23\n')
-                  elif 'minSdkVersion' in line and '//' not in line:
-                       f.write('        minSdkVersion 23\n')
-                  else:
-                      f.write(line)
+          try:
+              with open(path_app, 'r') as f: content = f.read()
+              
+              # Replace minSdkVersion with 23, handling any previous value
+              content = re.sub(r'minSdkVersion .*', 'minSdkVersion 23', content)
+              
+              with open(path_app, 'w') as f: f.write(content)
+              print(f'Updated {path_app}')
+          except FileNotFoundError:
+              print(f'{path_app} not found')
           "
           # Verify changes
-          echo "Checking Kotlin Version:"
+          echo "=== VERIFICATION ==="
           grep "kotlin_version" android/build.gradle || true
-          echo "Checking minSdkVersion:"
-          grep "minSdkVersion" android/app/build.gradle
+          grep "minSdkVersion" android/app/build.gradle || true
 
       - name: Build APK
         run: flutter build apk --release
